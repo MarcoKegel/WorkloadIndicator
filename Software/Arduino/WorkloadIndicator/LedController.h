@@ -30,7 +30,7 @@
 
 #include <Adafruit_NeoPixel.h>
 
-#define PIN				2
+#define PIN				3
 #define NUMPIXELS		1
 
 class LedController 
