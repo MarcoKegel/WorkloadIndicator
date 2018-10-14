@@ -18,10 +18,12 @@
 
 #include "LedController.h"
 
-
-
-
 LedController *led = new LedController();
+
+const byte PinSwitch1 = 2;
+const byte PinSwitch2 = 3;
+
+bool switchChanged = false;
 
 void setup()
 {
@@ -30,21 +32,47 @@ void setup()
 	while (!Serial) {
 		; // wait for serial port to connect. Needed for native USB port only
 	}
+
+	pinMode(PinSwitch1, INPUT_PULLUP);
+	attachInterrupt(digitalPinToInterrupt(PinSwitch1), IrqHandler, CHANGE);
+
+	pinMode(PinSwitch2, INPUT_PULLUP);
+	attachInterrupt(digitalPinToInterrupt(PinSwitch2), IrqHandler, CHANGE);
 }
 
 
 
 void loop()
 {
-	Serial.println("green");
-	led->ShowGreen();
-	delay(1000);
-	Serial.println("yellow");
-	led->ShowYellow();
-	delay(1000);
-	Serial.println("red");
-	led->ShowRed();
-	delay(1000);
+	if (switchChanged)
+	{
+		switchChanged = false;
+		int switchStaus1 = digitalRead(PinSwitch1);
+		int switchStaus2 = digitalRead(PinSwitch2);
+		if (switchStaus1==0)
+		{
+			Serial.println("Green");
+			led->ShowGreen();
+			return;
+		}
+		if (switchStaus2 == 0)
+		{
+			Serial.println("Red");
+			led->ShowRed();
+			return;
+		}
+		if (switchStaus1 == 1 && switchStaus2 == 1)
+		{
+			Serial.println("Yellow");
+			led->ShowYellow();
+			return;
+		}
+		Serial.println("Error State: Both switches ar pressed - unplausible");
+	}
 }
 
+void IrqHandler()
+{
+	switchChanged = true;
+}
 
